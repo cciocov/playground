@@ -1,0 +1,27 @@
+#!/usr/bin/env php
+<?php
+
+// get arguments:
+$i_file = (isset($argv[1]) ? $argv[1] : '');
+$o_file = (isset($argv[2]) ? $argv[2] : '');
+
+if (empty($i_file)) {
+	print "Usage: $argv[0] <input file> [<output file>]\n\n";
+	exit(1);
+}
+
+if (!is_file(realpath($i_file))) {
+	print "Input file not found at: $i_file\n\n";
+	exit(1);
+}
+$i_file = realpath($i_file);
+
+// make sure YUI compressor is available:
+$yuicompressor = dirname(__FILE__) . '/yuicompressor-2.4.2.jar';
+if (!is_file($yuicompressor)) {
+	print "YUI Compressor not found at: $yuicompressor\n\n";
+	exit(1);
+}
+
+$cmd = "java -jar $yuicompressor " . (!empty($o_file) ? "-o $o_file" : '') . $i_file;
+system($cmd);

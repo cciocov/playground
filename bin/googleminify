@@ -1,0 +1,27 @@
+#!/usr/bin/env php
+<?php
+
+// get arguments:
+$i_file = (isset($argv[1]) ? $argv[1] : '');
+$o_file = (isset($argv[2]) ? $argv[2] : '');
+
+if (empty($i_file)) {
+	print "Usage: $argv[0] <input file> [<output file>]\n\n";
+	exit(1);
+}
+
+if (!is_file(realpath($i_file))) {
+	print "Input file not found at: $i_file\n\n";
+	exit(1);
+}
+$i_file = realpath($i_file);
+
+// make sure Google compiler is available:
+$googlecompiler = dirname(__FILE__) . '/google-compiler.jar';
+if (!is_file($googlecompiler)) {
+	print "Google Compiler not found at: $googlecompiler\n\n";
+	exit(1);
+}
+
+$cmd = "java -jar $googlecompiler --js $i_file --warning_level QUIET" . (!empty($o_file) ? " --js_output_file $o_file" : '');
+system($cmd);
