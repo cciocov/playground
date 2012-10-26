@@ -6,6 +6,8 @@ BIN_DIR = ./bin
 OUT_DIR = ./out
 SRC_DIR = ./src
 
+MINIFY = 1
+
 # find all CSS and JS targets:
 TARGETS_CSS = $(basename $(subst $(SRC_DIR)/,,$(shell find $(SRC_DIR)/ -name *.css.dep -type f)))
 TARGETS_JS = $(basename $(subst $(SRC_DIR)/,,$(shell find $(SRC_DIR)/ -name *.js.dep -type f)))
@@ -32,20 +34,26 @@ endef
 ## Rules
 #
 
-.PHONY: all min help clean css css-min js js-min
+.PHONY: all min dev help clean css css-min js js-min
 
-# default target (all), bundle all CSS and JS targets:
+# bundle all CSS and JS targets:
 all: css js
 
 # minify all CSS and JS targets:
 min: css-min js-min
 
+# just like "min" target above, but don't actually minify the files (that is,
+# the *.min.* file is the same as the source/unminified counterpart):
+dev: MINIFY = 0
+dev: css-min js-min
+
 # some help:
 help:
 	@@echo "Available targets:"
 	@@echo ""
-	@@echo "  all - bundle all CSS and JS targets"
-	@@echo "  min - minify all CSS and JS targets"
+	@@echo "  all (default) - bundle all CSS and JS targets"
+	@@echo "  min           - minify all CSS and JS targets"
+	@@echo "  dev           - *.min.* files are built but they're not actually minified"
 	@@echo ""
 
 # clean up:
@@ -65,10 +73,10 @@ js-min: $(addprefix $(OUT_DIR)/,$(addsuffix .min.js, $(basename $(TARGETS_JS))))
 # generic rule to minify CSS:
 %.min.css: %.css
 	@@echo "Minifying [$@]..."
-	@@$(BIN_DIR)/yuiminify $< > $@
+	$(if $(subst 0,,$(MINIFY)),@@$(BIN_DIR)/yuiminify $< > $@,@@cp $< $@)
 
 # generic rule to minify JS:
 %.min.js: %.js
 	@@echo "Minifying [$@]..."
-	@@$(BIN_DIR)/googleminify $< > $@
+	$(if $(subst 0,,$(MINIFY)),@@$(BIN_DIR)/googleminify $< > $@,@@cp $< $@)
 
